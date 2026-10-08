@@ -1,0 +1,34 @@
+# Build output
+**/[Bb]in/
+**/[Oo]bj/
+/artifacts/
+/app/
+/bridge/
+
+# Editor and user settings
+.vs/
+.idea/
+*.user
+*.suo
+
+# Test output and JavaScript dependencies
+TestResults/
+node_modules/
+
+# Local download data and logs
+*.log
+*.db
+*.db-wal
+*.db-shm
+*.part
+
+# Credentials and private signing keys
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+
+# Packaged releases
+/QuickGrab-*.zip

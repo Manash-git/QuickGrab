@@ -1,0 +1,119 @@
+# QuickGrab CI revision 1, 2026-10-08 (software version remains unchanged).
+# Install as .github/workflows/windows-build.yml in the repository root.
+# New: Windows build, existing tests, unsigned artifact, source-commit metadata.
+# Why: establish an automated build from public source before signing integration.
+# Bug fixes: none. This workflow does not resolve Smart App Control blocking.
+# Validation: locally checked against the supplied v0.2.0 scripts; first GitHub
+# Windows run is still required. No signed build or browser UI test is claimed.
+name: QuickGrab Windows Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quickgrab-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test Windows x64
+    runs-on: windows-2022
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: 'true'
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Install .NET 10 SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Node.js for browser tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check cumulative release documentation
+        run: ./scripts/CheckReleaseDocs.ps1
+
+      - name: Restore solution
+        run: dotnet restore QuickGrab.slnx
+
+      - name: Build solution
+        run: dotnet build QuickGrab.slnx --configuration Release --no-restore
+
+      # The C# tests are a console harness, not a dotnet test project.
+      - name: Run download engine and protocol tests
+        run: ./scripts/Test.ps1
+
+      - name: Run browser handoff tests
+        run: ./scripts/TestBrowser.ps1
+
+      - name: Publish unsigned Windows package
+        run: |
+          ./scripts/Publish.ps1
+          $package = 'artifacts/windows-x64'
+          # Preserve current documentation even with an older Publish.ps1.
+          New-Item -ItemType Directory -Force "$package/docs" | Out-Null
+          Copy-Item 'docs/*' "$package/docs" -Recurse -Force
+          Copy-Item README.md,CHANGELOG.md,LICENSE $package -Force
+          foreach ($file in @('app/QuickGrab.exe', 'bridge/QuickGrab.NativeHost.exe',
+                              'extension/manifest.json', 'RegisterBrowser.cmd',
+                              'UnregisterBrowser.cmd', 'docs/releases.json', 'CHANGELOG.md')) {
+            if (-not (Test-Path "$package/$file")) { throw "Missing package file: $file" }
+          }
+
+      - name: Record build version and source
+        id: metadata
+        run: |
+          $release = Get-Content docs/releases.json -Raw | ConvertFrom-Json
+          $version = [string]$release.latest
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid release version.' }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          $sdk = dotnet --version
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot read SDK version.' }
+          $node = node --version
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot read Node version.' }
+          @(
+            '# QuickGrab CI build record',
+            '',
+            "Software version: $version",
+            "Repository: $env:GITHUB_REPOSITORY",
+            "Commit: $env:GITHUB_SHA",
+            "Run: $env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID",
+            "Run attempt: $env:GITHUB_RUN_ATTEMPT",
+            "UTC build time: $([DateTime]::UtcNow.ToString('o'))",
+            ".NET SDK: $sdk",
+            "Node.js: $node",
+            '',
+            'Status: UNSIGNED development build. Smart App Control may block startup.',
+            'Requires .NET 10 Desktop Runtime x64 on the target PC.',
+            'Validation: solution build, C# console tests and JavaScript handoff tests passed in this run.',
+            'Not tested by this workflow: WPF interaction, actual browser capture, or Smart App Control acceptance.',
+            'Cumulative software history: CHANGELOG.md and docs/PROJECT-HANDBOOK.md.',
+            'CI revision 1 adds Windows automation and build metadata; no application bug fix or version change.'
+          ) | Set-Content artifacts/windows-x64/BUILD-INFO.md -Encoding utf8
+
+      - name: Upload unsigned package
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuickGrab-v${{ steps.metadata.outputs.version }}-Windows-x64-unsigned-${{ github.run_number }}
+          path: artifacts/windows-x64/
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "QuickGrab Browser Integration",
+  "version": "0.2.0",
+  "description": "Send direct file downloads to QuickGrab on Windows. Supports incognito with browser permission.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtY6HvxlwFCohiXV1bmJDHCB+EjWSJIeeX5vz1gOdTFgFNDEf8za0J9KdPtHWha3c2bechR2dUCiNCsYXtieWoijU6ZJW0r12fkM5bXYXngb7R8fSXOBDQXbrJ91nmtFIy9iW0J5Ly76isie3+GFR7ehjje3wLI721QkqjP7Bfm8XT3CIFoQwoqS/0w3y1CANimtlqQIek3Pb13pCSoG8o2E6192W1Gx0vwNhywXs0lQqJi6Epo7ZjLW+UsClivuUkKU9KPwUSE6+6OBaQunrQfdP+b229Uls5vDKtsPwt5p3AAyA6uDP/aU+y7hlTq75J7pHYQF+vSgYrb6AxBpJqwIDAQAB",
+  "permissions": [
+    "downloads",
+    "nativeMessaging",
+    "contextMenus",
+    "storage"
+  ],
+  "incognito": "split",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "QuickGrab"
+  }
+}

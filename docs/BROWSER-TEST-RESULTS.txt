@@ -1,0 +1,8 @@
+PASS Handoff prepares before cancel and commits after cancel
+PASS Rejected native preparation resumes browser and never cancels
+PASS Failed browser cancel aborts pending job and resumes browser
+PASS Commit failure retains pending app job without browser duplicate
+PASS Completed browser file is not handed off
+PASS Incognito flag is forwarded explicitly
+PASS HTML, blob, credentials, unsafe downloads and unknown sizes are excluded
+7/7 browser handoff tests passed

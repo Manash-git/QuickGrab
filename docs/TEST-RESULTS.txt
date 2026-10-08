@@ -1,0 +1,32 @@
+PASS Browser protocol framing and bounds
+PASS Browser protocol validation and safe filenames
+PASS Browser prepare/commit idempotence and downloaded bytes
+PASS Browser HTML response stays out of queue
+PASS Browser size mismatch stays out of queue
+PASS Browser abort removes only pending job
+PASS Real HTTP streaming and pause/resume
+PASS Real HTTP Last-Modified range resume
+PASS Killed process without validators retains and verifies prefix
+PASS Killed download process recovers from SQLite checkpoint
+PASS Complete download matches SHA-256
+PASS Pause and resume uses Range + If-Range
+PASS Ignored Range never appends
+PASS Changed ETag never appends
+PASS Wrong Content-Range never appends
+PASS Weak validator resumes after full prefix verification
+PASS Missing validator preserves prefix and resumes
+PASS Changed prefix is rejected without modifying saved file
+PASS Last-Modified resume requests only remaining bytes
+PASS Changed Last-Modified is rejected
+PASS Legacy database migration preserves checkpoints
+PASS NeedsRestart jobs can retry resume without discarding data
+PASS Uncommitted trailing bytes are discarded
+PASS Short partial file requires restart
+PASS Final rename crash window recovers
+PASS Existing destination is not overwritten
+PASS Transient server errors retry
+PASS Global limiter combines simultaneous transfers
+PASS Queue concurrency is bounded
+PASS Startup restores active jobs paused
+PASS URL schemes and filenames are constrained
+31/31 passed

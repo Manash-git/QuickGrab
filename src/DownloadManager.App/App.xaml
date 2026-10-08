@@ -1,0 +1,6 @@
+<Application x:Class="DownloadManager.App.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<Application.Resources>
+<SolidColorBrush x:Key="Accent" Color="#2457D6"/>
+<Style TargetType="Button"><Setter Property="Padding" Value="14,8"/><Setter Property="Margin" Value="0,0,8,0"/><Setter Property="Background" Value="#EAF0FC"/><Setter Property="Foreground" Value="#193E87"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/></Style>
+<Style TargetType="TextBox"><Setter Property="Padding" Value="8,6"/><Setter Property="BorderBrush" Value="#CAD2DF"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
+</Application.Resources></Application>

@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "latest": "0.2.0",
+  "releases": [
+    {
+      "version": "0.1.1",
+      "date": "2026-10-07",
+      "title": "Progress display and error reporting",
+      "new": [
+        "Added error reports with exception type, message and stack trace; URL strings are redacted. Reports are written to the local logs folder, with a temporary-folder fallback."
+      ],
+      "modified": [
+        {
+          "change": "Set progress and other read-only display bindings to Mode=OneWay.",
+          "why": "A display control must read computed progress without trying to write into a read-only property."
+        },
+        {
+          "change": "Replaced the generic startup message and added error reporting to UI actions and refresh failures.",
+          "why": "The old message suggested disk or permission problems for unrelated interface exceptions."
+        }
+      ],
+      "fixed": [
+        "Addressed the progress-binding defect associated with the error seen when adding a download. The original generic message did not expose the precise exception, so the exact original cause was not independently captured.",
+        "Removed the misleading implication that every startup/interface failure was a local-data access problem."
+      ],
+      "validation": [
+        "Windows-targeted app compiled; the user confirmed the app worked after installing this build.",
+        "The 17 engine tests were inherited from v0.1; a new 17-test run was not claimed for this UI-only patch."
+      ],
+      "migration": "No database migration. Existing queue records and partial files were preserved.",
+      "limitations": [
+        "Pause/resume still required a strong ETag. The next release addressed servers that omitted one."
+      ]
+    },
+    {
+      "version": "0.1.2",
+      "date": "2026-10-07",
+      "title": "Resume compatibility and saved data verification",
+      "new": [
+        "Added Last-Modified based range resume when no ETag is supplied and the server date supports treating the timestamp as a strong validator.",
+        "Added the Verifying state and a fallback that compares the complete saved prefix with the current response before appending.",
+        "Added last_modified storage and a transactional, additive schema migration to version 2."
+      ],
+      "modified": [
+        {
+          "change": "Resume may retry a NeedsRestart job without clearing its partial data. Only explicit Restart resets the saved bytes.",
+          "why": "Older jobs rejected solely for missing ETags should be recoverable."
+        },
+        {
+          "change": "Updated progress details to explain direct resume versus verification.",
+          "why": "During verification, saved file progress stays unchanged even though network data is being read."
+        }
+      ],
+      "fixed": [
+        "Removed the blanket refusal to resume a partial file simply because it had no strong ETag.",
+        "Extended reopen/crash recovery to jobs without a saved validator while retaining mismatch protection."
+      ],
+      "validation": [
+        "25 automated C# tests passed, including real HTTP Last-Modified resume, forced-process termination, no-validator recovery, migration and changed-content rejection.",
+        "The user confirmed Resume worked after installing this build."
+      ],
+      "migration": "Adds nullable last_modified to jobs; existing offsets and destinations remain intact. Older jobs may verify their saved prefix before obtaining a usable validator.",
+      "limitations": [
+        "Fallback verification rereads the saved prefix over the network. It is not a bandwidth-free range resume.",
+        "Changed server content, missing partial files or invalid range responses can still require explicit restart."
+      ]
+    },
+    {
+      "version": "0.1.3",
+      "date": "2026-10-07",
+      "title": "Clean application shutdown",
+      "new": [
+        "Added a dedicated FinishClosingAsync shutdown routine scheduled through the WPF dispatcher."
+      ],
+      "modified": [
+        {
+          "change": "Cancel the first Closing event and dispatch shutdown work after that event returns. Stop and checkpoint jobs before the final Close call.",
+          "why": "Awaiting an already completed StopAsync task does not yield; the old code could call Close while WPF was already closing the same window."
+        },
+        {
+          "change": "Keep the existing closing/canClose guards and stop the refresh timer during shutdown.",
+          "why": "Repeated X clicks must not start multiple shutdown sequences."
+        }
+      ],
+      "fixed": [
+        "Fixed InvalidOperationException reporting that Close, Show or visibility changes cannot occur while a window is closing."
+      ],
+      "validation": [
+        "Windows app was cross-compiled and packaged. The engine was unchanged; the 25-test result belonged to v0.1.2, not a new UI test run.",
+        "The user confirmed that the close behavior worked in v0.1.3."
+      ],
+      "migration": "No schema change. Queue data and partial downloads remain compatible.",
+      "limitations": [
+        "The app does not continue downloading as a background Windows service after it closes."
+      ]
+    },
+    {
+      "version": "0.2.0",
+      "date": "2026-10-07",
+      "title": "Chrome and Edge browser integration",
+      "new": [
+        "Added a Manifest V3 extension with automatic capture of eligible public file downloads and a Download with QuickGrab context-menu action.",
+        "Added split incognito/InPrivate extension contexts, private-capture settings and a connection-test popup.",
+        "Added QuickGrab.BrowserProtocol, QuickGrab.NativeHost, a current-user named-pipe server and per-user registration/removal scripts.",
+        "Added prepare, commit, abort and ping messages; BrowserPending jobs; request-ID based duplicate protection and handoff recovery."
+      ],
+      "modified": [
+        {
+          "change": "The desktop app starts the pipe server, accepts browser jobs and stops the bridge during shutdown. The native host can launch the app with --browser-start.",
+          "why": "Browser downloads need a controlled entry point into the same durable queue."
+        },
+        {
+          "change": "Persist a pending job before cancelling the browser transfer; start it only after commit.",
+          "why": "A failed bridge must not silently discard the download or start duplicate browser/app copies."
+        },
+        {
+          "change": "Package app, bridge, extension and setup instructions together.",
+          "why": "The browser needs a registered native executable as well as the extension."
+        }
+      ],
+      "fixed": [
+        "No separate user-reported v0.2.0 defect was resolved in this feature release. Earlier download, resume, UI and close fixes were retained.",
+        "Failure handling prevents duplicate preparation/commit, removes aborted pending records where safe and restores the browser transfer when handoff fails before cancellation. These are new defensive behaviors, not previously confirmed user bugs."
+      ],
+      "validation": [
+        "31 C# tests and 7 JavaScript handoff tests passed; the WPF app and native host were cross-compiled for Windows x64.",
+        "Actual Chrome/Edge interception, registry installation and private-window behavior have not yet been confirmed on the user PC."
+      ],
+      "migration": "Adds the BrowserPending state, not a new database column. Register the native host for this extracted folder and load the extension in each browser. Keep the app, bridge and extension folders together.",
+      "limitations": [
+        "Only compatible public HTTP/HTTPS file links are supported. Browser cookies, authenticated requests, form-generated files, blob/data URLs and media-page extraction are not reproduced.",
+        "Incognito/InPrivate jobs and URLs remain in desktop history and on disk. Private browser mode does not make QuickGrab storage private."
+      ]
+    }
+  ]
+}

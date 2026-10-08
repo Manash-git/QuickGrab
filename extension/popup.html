@@ -1,0 +1,10 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>QuickGrab</title><link rel="stylesheet" href="popup.css"></head><body>
+<h1>QuickGrab <small>0.2.0</small></h1>
+<p>Send direct file downloads to the Windows app.</p>
+<label><input type="checkbox" id="auto"> Automatically capture downloads</label>
+<label><input type="checkbox" id="private"> Capture in private windows</label>
+<p class="notice">Incognito/InPrivate downloads sent to QuickGrab are saved in its desktop history and on disk. Closing the private window does not erase them.</p>
+<p>Enable <b>Allow in incognito</b> (Chrome) or <b>Allow in InPrivate</b> (Edge) in this extension’s browser details.</p>
+<button id="test">Test connection</button><p id="result" role="status"></p>
+<p id="last"></p><p class="foot">Destination: your user folder → Downloads → QuickGrab.<br>Browser cookies are not imported. Unsupported downloads stay in the browser.</p>
+<script type="module" src="popup.js"></script></body></html>

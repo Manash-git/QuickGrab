@@ -151,3 +151,13 @@ queue, completed/paused jobs, then active downloads; reopen and resume the latte
 ## Project documentation
 
 Read [the project handbook](docs/PROJECT-HANDBOOK.md) for architecture, stack, prerequisites, setup, privacy, testing and recovery. [Build history](CHANGELOG.md) records every version from v0.1.1 onward. Future delivered builds must update these files and pass `scripts/CheckReleaseDocs.ps1`.
+## Privacy policy
+
+See the [QuickGrab privacy policy](PRIVACY.md).
+
+## Code signing policy
+
+Current builds are unsigned. SignPath approval and signing
+integration are not yet complete.
+
+See the [Code signing policy](CODE-SIGNING.md).
